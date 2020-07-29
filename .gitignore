@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Enviroment config file
+.env*
+
+# Certificates
+*.pem
+google-service-key*
+
+# Build
+dist/
+coverage/
+
+# IDE
+\.idea/
+
+# Logs
+yarn-error.log
+
+# Yarn cache
+yarn_cache/
+
+# Docker
+docker-compose-local.yml
+
+# Test results
+itest/newman
+
+# npm
+package-lock.json
+
+# DS_Store
+.DS_Store
+
+# Intelij Idea module file
+/*.iml
+
+# Local testing
+*-local.json
+
+# Vagrant files
+.vagrant/
