@@ -1,8 +1,5 @@
 package ro.codespring.aggregator.api;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -13,9 +10,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
-import ro.codespring.aggregator.api.dto.Status;
 import ro.codespring.aggregator.api.dto.StatusReport;
+import ro.codespring.aggregator.metrics.VoltMeter;
 
 @RestController
 @Validated
@@ -23,42 +21,51 @@ public class StatusController {
 	
 	private final MeterRegistry registry;
 	
-	private final Map<String, Map<Status, Integer>> statusCounts = new HashMap<>();
-	
 	private static final Logger log = LoggerFactory.getLogger(StatusController.class);
-
+	
+	private static final String electricaVoltageGauge = "Electrica.voltage";
+	private static final String eonVoltageGauge = "EON.voltage";
+	
+	private final VoltMeter electricaVM = new VoltMeter();
+	private final VoltMeter eonVM = new VoltMeter();
+	
 	public StatusController(final MeterRegistry registry) {
         this.registry = registry;
+        Gauge.builder(electricaVoltageGauge, electricaVM, VoltMeter::average).register(registry);
+        Gauge.builder(eonVoltageGauge, eonVM, VoltMeter::average).register(registry);
     }
 	
 	@PostMapping("/status")
-	@Timed
+	@Timed(value="aggregator.response.time")
 	public String interceptStatus(
 			@RequestBody @Valid
 			final StatusReport report) {
-		updateStatusCounts(report);
-		updatePrometheusCounters(report);
+		updateVoltMeters(report);
+		updatePrometheusMetrics(report);
 		return "Status intercepted";
 	}
 	
-	private void updateStatusCounts(final StatusReport report) {
-		if (statusCounts.containsKey(report.getClient())) {
-			final Map<Status, Integer> clientStatus = statusCounts.get(report.getClient());
-			if (clientStatus.containsKey(report.getStatus())) {
-				Integer count = clientStatus.get(report.getStatus());
-				clientStatus.replace(report.getStatus(), count, ++count);
-			} else {
-				clientStatus.put(report.getStatus(), 1);
-			}
+	private void updateVoltMeters(final StatusReport report) {
+		if (report.getClient().equalsIgnoreCase("eon")) {
+			eonVM.addValue(report.getVoltage());
 		} else {
-			statusCounts.put(report.getClient(), Map.of(report.getStatus(), 1));
+			electricaVM.addValue(report.getVoltage());
 		}
-		log.debug("Internal counters updated.");
+		log.debug("Voltmeters updated.");
 	}
 	
-	private void updatePrometheusCounters(final StatusReport report) {
-		final String counterName = report.getClient() + ".counter." + report.getStatus();
-		registry.counter(counterName).increment();
-		log.info("Prometheus counter {} updated.", counterName);
+	private void updatePrometheusMetrics(final StatusReport report) {
+		final String counter = report.getClient() + ".counter." + report.getStatus();
+		registry.counter(counter).increment();
+		
+		if (report.getClient().equalsIgnoreCase("electrica")) {
+			registry.gauge(electricaVoltageGauge, report.getVoltage());
+		} else {
+			registry.gauge(eonVoltageGauge, report.getVoltage());
+		}
+		
+		log.info("Prometheus metrics updated.");
 	}
+	
+	
 }

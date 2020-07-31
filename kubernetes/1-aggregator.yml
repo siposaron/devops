@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aggregator
+  labels:
+    app: aggregator
+    deployment: aggregator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aggregator
+  template:
+    metadata:
+      labels:
+        app: aggregator
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/scheme: http
+    spec:
+      containers:
+        - image: docker.io/siposaron/aggregator:0.0.1
+          imagePullPolicy: Always
+          name: aggregator
+          env:
+          - name: JAVA_OPTS
+            value: -Xmx256m -Xms256m
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              memory: 291Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aggregator-service
+  labels:
+    service: aggregator
+spec:
+  type: ClusterIP
+  ports:
+    - name: aggregator-service
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: aggregator
