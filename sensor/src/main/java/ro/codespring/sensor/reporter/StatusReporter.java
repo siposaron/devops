@@ -9,6 +9,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import ro.codespring.sensor.reporter.dto.StatusReport;
+
 @Component
 public class StatusReporter {
 	
@@ -24,8 +26,13 @@ public class StatusReporter {
 
 	@Scheduled(fixedRate = 1000)
 	public void reportCurrentStatus() {
-		final String response = template.postForObject(aggregatorEndpoint, generator.generate(), String.class);
-		log.debug("Response {}", response);
+		final StatusReport report = generator.generate();
+		final String response = template.postForObject(aggregatorEndpoint, report, String.class);
+		log.debug("Client: {}, Status: {}, Voltage: {} processed, response is {}", 
+				report.getClient(), 
+				report.getStatus(), 
+				report.getVoltage(),
+				response);
 	}
 
 }

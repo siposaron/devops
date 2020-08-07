@@ -20,7 +20,7 @@ spec:
         prometheus.io/path: "/actuator/prometheus"
     spec:
       containers:
-        - image: docker.io/siposaron/sensor:0.0.1
+        - image: docker.io/siposaron/sensor:0.0.2
           name: electrica-sensor
           imagePullPolicy: Always
           env:
@@ -32,12 +32,16 @@ spec:
             value: -Xmx256m -Xms256m
           - name: SERVER_PORT 
             value: "8080"
+          - name: logging.logstash.enabled
+            value: "true"
+          - name: logging.logstash.url
+            value: "ks16.codespring.ro:31500"
           ports:
             - containerPort: 8080
           resources:
             limits:
               memory: 291Mi
-        - image: docker.io/siposaron/sensor:0.0.1
+        - image: docker.io/siposaron/sensor:0.0.2
           name: eon-sensor
           imagePullPolicy: Always
           env:
@@ -49,6 +53,10 @@ spec:
             value: -Xmx256m -Xms256m  
           - name: SERVER_PORT 
             value: "8081"
+          - name: logging.logstash.enabled
+            value: "true"
+          - name: logging.logstash.url
+            value: "ks16.codespring.ro:31500"
           ports:
             - containerPort: 8081    
           resources:

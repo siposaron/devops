@@ -117,10 +117,12 @@ spec:
     - protocol: TCP
       port: 5044
       targetPort: 5044
+      nodePort: 30415
       name: filebeat
     - protocol: TCP
       port: 9600
       targetPort: 9600
+      nodePort: 30380
       name: logstash
     - protocol: TCP
       port: 5000
