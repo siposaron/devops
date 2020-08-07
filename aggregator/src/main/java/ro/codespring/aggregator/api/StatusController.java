@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -20,6 +22,7 @@ import ro.codespring.aggregator.metrics.VoltMeter;
 public class StatusController {
 	
 	private final MeterRegistry registry;
+	private final ObjectMapper mapper;
 	
 	private static final Logger log = LoggerFactory.getLogger(StatusController.class);
 	
@@ -29,8 +32,11 @@ public class StatusController {
 	private final VoltMeter electricaVM = new VoltMeter();
 	private final VoltMeter eonVM = new VoltMeter();
 	
-	public StatusController(final MeterRegistry registry) {
+	public StatusController(
+			final MeterRegistry registry,
+			final ObjectMapper mapper) {
         this.registry = registry;
+        this.mapper = mapper;
         Gauge.builder(electricaVoltageGauge, electricaVM, VoltMeter::average).register(registry);
         Gauge.builder(eonVoltageGauge, eonVM, VoltMeter::average).register(registry);
     }
@@ -40,9 +46,19 @@ public class StatusController {
 	public String interceptStatus(
 			@RequestBody @Valid
 			final StatusReport report) {
-		updateVoltMeters(report);
-		updatePrometheusMetrics(report);
-		return "Status intercepted";
+		try {
+			log.info("Client: {}, Status: {}, Voltage: {}", 
+					report.getClient(), 
+					report.getStatus(), 
+					report.getVoltage());
+			updateVoltMeters(report);
+			updatePrometheusMetrics(report);
+			return "Status intercepted";
+		} catch (Exception e) {
+			log.error("Error: {}", e.getMessage());
+			return "Status couldn't be fully processed.";	
+		}
+		
 	}
 	
 	private void updateVoltMeters(final StatusReport report) {
