@@ -1,8 +1,10 @@
 pipeline {
     // agent none 
     agent {
-        image 'maven:3-alpine'
-        args '-u root'
+        docker {
+            image 'maven:3-alpine'
+            args '-u root'
+        }
     }
     stages {
         // stage('Stage Hello') {
