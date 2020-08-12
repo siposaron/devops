@@ -35,26 +35,20 @@ data:
         if [tenant] == "electrica" {
             elasticsearch {
                 hosts => "${ES_HOSTS}"
-                index => "aron-%{tenant}-logstash-tcp-%{+YYYY.MM.dd}"
+                index => "aggregator-%{tenant}-logstash-tcp-%{+YYYY.MM.dd}"
           }
         } else if [tenant] == "eon" {
             elasticsearch {
                 hosts => "${ES_HOSTS}"
-                index => "aron-%{tenant}-logstash-tcp-%{+YYYY.MM.dd}"
+                index => "aggregator-%{tenant}-logstash-tcp-%{+YYYY.MM.dd}"
           }
         } else {
             elasticsearch {
                 hosts => "${ES_HOSTS}"
-                index => "aron-logstash-tcp-%{+YYYY.MM.dd}"
+                index => "aggregator-logstash-tcp-%{+YYYY.MM.dd}"
           }
         }
     }
-#    output {
-#      elasticsearch {
-#        hosts => [ "${ES_HOSTS}" ]
-#        index => "${ES_INDEX}"
-#      }
-#    }
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -76,8 +70,6 @@ spec:
             env:
             - name: ES_HOSTS
               value: "http://elk.apps.okd.codespring.ro:80"
-            - name: ES_INDEX
-              value: "arons-aggregator"  
             ports:
               - containerPort: 5044
                 name: filebeat

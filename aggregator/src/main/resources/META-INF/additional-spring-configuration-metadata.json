@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "logging.logstash.ignorePatterns",
+    "type": "java.lang.String",
+    "description": "Ignored Logstash patterns"
+  },
+  {
+    "name": "logging.logstash.url",
+    "type": "java.lang.String",
+    "description": "Logstash url"
+  },
+  {
+    "name": "logging.logstash.enabled",
+    "type": "java.lang.Boolean",
+    "description": "Enable Logstash"
+  }
+]}
