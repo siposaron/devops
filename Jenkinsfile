@@ -1,5 +1,9 @@
 pipeline {
-    agent none 
+    // agent none 
+    agent {
+        image 'maven:3-alpine'
+        args '-u root'
+    }
     stages {
         // stage('Stage Hello') {
         //     agent {
@@ -11,10 +15,6 @@ pipeline {
         //     }
         // }
         stage('Build') {
-            agent {
-                image 'maven:3-alpine'
-                args '-u root'
-            }
             steps {
                 sh 'mvn -B -DskipTests clean install'
             }
