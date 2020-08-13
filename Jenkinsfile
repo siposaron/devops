@@ -7,9 +7,9 @@ pipeline {
                 label 'aggregator-agent-local'
             }
             steps {
-                sh 'mvn -B -DskipTests clean install'
+                sh 'make build'
             }
         }
     }
-    
+
 }
