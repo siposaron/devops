@@ -1,4 +1,4 @@
-.PHONY: build build-aggregator build-sensor docker-build docker-push release release-aggregator docker-release-aggregator docker-release-sensor
+.PHONY: build build-aggregator build-sensor docker-build docker-push release release-aggregator docker-release-aggregator docker-release-sensor deploy-services
 
 aggregator_ver := $(shell mvn -f ./aggregator help:evaluate -Dexpression=project.version | grep -e '^[^\[]')
 sensor_ver := $(shell mvn -f ./sensor help:evaluate -Dexpression=project.version | grep -e '^[^\[]')
@@ -45,3 +45,6 @@ release-aggregator:
 	docker build --tag siposaron/aggregator:$(aggregator_ver) ./aggregator
 	docker push siposaron/aggregator:$(aggregator_ver)
 
+deploy-services:
+	oc apply -f ./kubernetes/1-aggregator.yml
+	oc apply -f ./kubernetes/2-sensors.yml

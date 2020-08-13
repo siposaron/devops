@@ -35,7 +35,7 @@ pipeline {
                         label 'aggregator-agent-local'
                     }
                     steps {
-                        sh 'docker login -u $DOCKER_USER -p $DOCKER_PASS'
+                        sh("docker login -u $DOCKER_USER -p $DOCKER_PASS")
                         sh 'make docker-release-aggregator'
                     }
                 }
@@ -44,12 +44,40 @@ pipeline {
                         label 'aggregator-agent-local'
                     }
                     steps {
-                        sh 'docker login -u $DOCKER_USER -p $DOCKER_PASS'
+                        sh("docker login -u $DOCKER_USER -p $DOCKER_PASS")
                         sh 'make docker-release-sensor'
                     }
                 }
             }
         }
+        stage('Deploy services') {
+            environment {
+                OC_TOKEN = credentials('SA_OC_TOKEN')
+            }
+            agent {
+                kubernetes {
+                label 'oc-agent'
+                defaultContainer 'oc-agent'
+                yaml """
+                    kind: Pod
+                    metadata:
+                    name: oc-agent
+                    spec:
+                    containers:
+                    - name: oc-agent
+                        image: widerin/openshift-cli
+                        imagePullPolicy: Always
+                        tty: true
+                    """
+                } // kubernetes
+            } // agent
+            steps {
+                script {
+                    sh("oc login --token=$OC_TOKEN")
+                    sh "make deploy-services"
+                } // container
+            } // steps
+        } // stage(build)
     }
 
 }

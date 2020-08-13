@@ -10,13 +10,17 @@ RUN apt-get update && apt-get install \
     gnupg-agent \
     software-properties-common -y
 
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 RUN apt-key fingerprint 0EBFCD88
 
 RUN add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/debian \
    $(lsb_release -cs) \
    stable" -y
+
+RUN apt-get update -y
+RUN apt-get install docker-ce docker-ce-cli containerd.io -y
+RUN docker -v
 
 # Downloading and installing Maven
 # 1- Define a constant with the version of maven you want to install
