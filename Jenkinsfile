@@ -2,27 +2,54 @@ pipeline {
     agent none 
     
     stages {
-        stage('Building parallel') {
-            failFast true
-            parallel {
-                stage('Build Aggregator') {
-                    agent {
-                        label 'aggregator-agent-local'
-                    }
-                    steps {
-                        sh 'make build-aggregator'
-                    }
-                }
-                stage('Build Sensor') {
-                    agent {
-                        label 'aggregator-agent-local'
-                    }
-                    steps {
-                        sh 'make build-sensor'
-                    }
-                }
-            }
-        }
+        // stage('Building parallel') {
+        //     failFast true
+        //     parallel {
+        //         stage('Build Aggregator') {
+        //             agent {
+        //                 label 'aggregator-agent-local'
+        //             }
+        //             steps {
+        //                 sh 'make build-aggregator'
+        //             }
+        //         }
+        //         stage('Build Sensor') {
+        //             agent {
+        //                 label 'aggregator-agent-local'
+        //             }
+        //             steps {
+        //                 sh 'make build-sensor'
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage('Build services') {
+            agent {
+                kubernetes {
+                    label 'aggregator-build-agent'
+                    defaultContainer 'aggregator-build-agent'
+                    yaml """
+                        kind: Pod
+                        metadata:
+                            name: aggregator-build-agent
+                        spec:
+                            containers:
+                                - name: aggregator-build-agent
+                                image: maven/3-adoptopenjdk-11
+                                imagePullPolicy: Always
+                                tty: true
+                    """
+                } // kubernetes
+            } // agent
+            steps {
+                script {
+                    sh 'make build-aggregator'
+                    sh 'make build-sensor'
+                } // container
+            } // steps
+        } // stage(build)
+
         stage('Docker release parallel') {
             environment {
                 DOCKER_USER = credentials('SA_DOCKER_USERNAME')
@@ -56,19 +83,19 @@ pipeline {
             }
             agent {
                 kubernetes {
-                label 'oc-agent'
-                defaultContainer 'oc-agent'
-                yaml """
-                    kind: Pod
-                    metadata:
-                    name: oc-agent
-                    spec:
-                    containers:
-                    - name: oc-agent
-                        image: widerin/openshift-cli
-                        imagePullPolicy: Always
-                        tty: true
-                    """
+                    label 'oc-agent'
+                    defaultContainer 'oc-agent'
+                    yaml """
+                        kind: Pod
+                        metadata:
+                            name: oc-agent
+                        spec:
+                            containers:
+                                - name: oc-agent
+                                image: widerin/openshift-cli
+                                imagePullPolicy: Always
+                                tty: true
+                        """
                 } // kubernetes
             } // agent
             steps {
@@ -77,7 +104,7 @@ pipeline {
                     sh "make deploy-services"
                 } // container
             } // steps
-        } // stage(build)
+        } // stage(deploy)
     }
 
 }
