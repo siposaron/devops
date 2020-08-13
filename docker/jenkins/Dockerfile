@@ -2,6 +2,8 @@ FROM jenkins/inbound-agent:latest-jdk11
 
 USER root
 
+RUN apt-get update && apt-get install make
+
 # Downloading and installing Maven
 # 1- Define a constant with the version of maven you want to install
 ARG MAVEN_VERSION=3.6.3        

@@ -11,4 +11,6 @@ if [ ! -f "$FILE" ]; then
     exit -1;
 fi
 
+docker stop jenkins-agent
+docker container rm jenkins-agent
 docker run --env-file env.conf --name jenkins-agent --init siposaron/jenkins-agent-j11-maven:$1
