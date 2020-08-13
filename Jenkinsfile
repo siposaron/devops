@@ -2,12 +2,46 @@ pipeline {
     agent none 
     
     stages {
-        stage('Build') {
-            agent {
-                label 'aggregator-agent-local'
+        stage('Building parallel') {
+            failFast true
+            parallel {
+                stage('Build Aggregator') {
+                    agent {
+                        label 'aggregator-agent-local'
+                    }
+                    steps {
+                        sh 'make build-aggregator'
+                    }
+                }
+                stage('Build Sensor') {
+                    agent {
+                        label 'aggregator-agent-local'
+                    }
+                    steps {
+                        sh 'make build-sensor'
+                    }
+                }
             }
-            steps {
-                sh 'make build'
+        }
+        stage('Docker release parallel') {
+            failFast true
+            parallel {
+                stage('Release Aggregator docker image') {
+                    agent {
+                        label 'aggregator-agent-local'
+                    }
+                    steps {
+                        sh 'make docker-release-aggregator'
+                    }
+                }
+                stage('Release Sensor docker image') {
+                    agent {
+                        label 'aggregator-agent-local'
+                    }
+                    steps {
+                        sh 'make docker-release-sensor'
+                    }
+                }
             }
         }
     }
