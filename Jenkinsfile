@@ -32,13 +32,13 @@ pipeline {
                     yaml """
                         kind: Pod
                         metadata:
-                            name: aggregator-build-agent
+                          name: aggregator-build-agent
                         spec:
-                            containers:
-                                - name: aggregator-build-agent
-                                image: maven/3-adoptopenjdk-11
-                                imagePullPolicy: Always
-                                tty: true
+                          containers:
+                          - name: aggregator-build-agent
+                            image: maven/3-adoptopenjdk-11
+                            imagePullPolicy: Always
+                            tty: true
                     """
                 } // kubernetes
             } // agent
@@ -88,13 +88,13 @@ pipeline {
                     yaml """
                         kind: Pod
                         metadata:
-                            name: oc-agent
+                          name: oc-agent
                         spec:
-                            containers:
-                                - name: oc-agent
-                                image: widerin/openshift-cli
-                                imagePullPolicy: Always
-                                tty: true
+                          containers:
+                          - name: oc-agent
+                            image: widerin/openshift-cli
+                            imagePullPolicy: Always
+                            tty: true
                         """
                 } // kubernetes
             } // agent
