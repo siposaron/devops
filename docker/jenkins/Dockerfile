@@ -2,7 +2,21 @@ FROM jenkins/inbound-agent:latest-jdk11
 
 USER root
 
-RUN apt-get update && apt-get install make
+RUN apt-get update && apt-get install \
+    make \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common -y
+
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+RUN apt-key fingerprint 0EBFCD88
+
+RUN add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/debian \
+   $(lsb_release -cs) \
+   stable" -y
 
 # Downloading and installing Maven
 # 1- Define a constant with the version of maven you want to install
