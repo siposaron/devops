@@ -10,4 +10,5 @@ if [ ! -f "$FILE" ]; then
         JENKINS_URL="
     exit -1;
 fi
-docker run --env-file env.conf --name jenkins-agent --init jenkins/inbound-agent:latest-jdk11
+
+docker run --env-file env.conf --name jenkins-agent --init siposaron/jenkins-agent-j11-maven:$1

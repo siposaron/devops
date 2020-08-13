@@ -1,25 +1,15 @@
 pipeline {
-    // agent none 
-    agent {
-        docker {
-            image 'maven:3-alpine'
-            args '-u root'
-        }
-    }
+    agent none 
+    
     stages {
-        // stage('Stage Hello') {
-        //     agent {
-        //         label 'aggregator-agent-local'
-        //     }
-
-        //     steps {
-        //         echo 'Hello world!' 
-        //     }
-        // }
         stage('Build') {
+            agent {
+                label 'aggregator-agent-local'
+            }
             steps {
                 sh 'mvn -B -DskipTests clean install'
             }
         }
     }
+    
 }
