@@ -28,15 +28,15 @@ pipeline {
             agent {
                 kubernetes {
                     label 'aggregator-build-agent'
-                    defaultContainer 'aggregator-build-agent'
+                    defaultContainer 'builder'
                     yaml """
                         kind: Pod
                         metadata:
                           name: aggregator-build-agent
                         spec:
                           containers:
-                          - name: aggregator-build-agent
-                            image: maven/3-adoptopenjdk-11
+                          - name: builder
+                            image: maven:3-adoptopenjdk-11
                             imagePullPolicy: Always
                             tty: true
                     """
@@ -84,14 +84,14 @@ pipeline {
             agent {
                 kubernetes {
                     label 'oc-agent'
-                    defaultContainer 'oc-agent'
+                    defaultContainer 'builder'
                     yaml """
                         kind: Pod
                         metadata:
                           name: oc-agent
                         spec:
                           containers:
-                          - name: oc-agent
+                          - name: builder
                             image: widerin/openshift-cli
                             imagePullPolicy: Always
                             tty: true
