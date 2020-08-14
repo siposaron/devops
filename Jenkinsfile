@@ -2,53 +2,81 @@ pipeline {
     agent none 
     
     stages {
-        // stage('Building parallel') {
-        //     failFast true
-        //     parallel {
-        //         stage('Build Aggregator') {
-        //             agent {
-        //                 label 'aggregator-agent-local'
-        //             }
-        //             steps {
-        //                 sh 'make build-aggregator'
-        //             }
-        //         }
-        //         stage('Build Sensor') {
-        //             agent {
-        //                 label 'aggregator-agent-local'
-        //             }
-        //             steps {
-        //                 sh 'make build-sensor'
-        //             }
-        //         }
-        //     }
-        // }
-
-        stage('Build services') {
+        stage('OpenShift Check') {
+            environment {
+                OC_TOKEN = credentials('SA_OC_TOKEN')
+            }
             agent {
                 kubernetes {
-                    label 'aggregator-build-agent'
+                    label 'oc-agent'
                     defaultContainer 'builder'
                     yaml """
                         kind: Pod
                         metadata:
-                          name: aggregator-build-agent
+                          name: oc-agent
                         spec:
                           containers:
                           - name: builder
-                            image: maven:3-adoptopenjdk-11
+                            image: widerin/openshift-cli
                             imagePullPolicy: Always
                             tty: true
-                    """
+                        """
                 } // kubernetes
             } // agent
             steps {
                 script {
-                    sh 'make build-aggregator'
-                    sh 'make build-sensor'
+                    sh("oc login --token=$OC_TOKEN")
+                    // sh "make deploy-services"
                 } // container
             } // steps
-        } // stage(build)
+        } // stage(deploy)
+
+        stage('Building parallel') {
+            failFast true
+            parallel {
+                stage('Build Aggregator') {
+                    agent {
+                        label 'aggregator-agent-local'
+                    }
+                    steps {
+                        sh 'make build-aggregator'
+                    }
+                }
+                stage('Build Sensor') {
+                    agent {
+                        label 'aggregator-agent-local'
+                    }
+                    steps {
+                        sh 'make build-sensor'
+                    }
+                }
+            }
+        }
+        // stage('Build services with Kube agents') {
+        //     agent {
+        //         kubernetes {
+        //             label 'aggregator-build-agent'
+        //             defaultContainer 'builder'
+        //             yaml """
+        //                 kind: Pod
+        //                 metadata:
+        //                   name: aggregator-build-agent
+        //                 spec:
+        //                   containers:
+        //                   - name: builder
+        //                     image: maven:3-adoptopenjdk-11
+        //                     imagePullPolicy: Always
+        //                     tty: true
+        //             """
+        //         } // kubernetes
+        //     } // agent
+        //     steps {
+        //         script {
+        //             sh 'make build-aggregator'
+        //             sh 'make build-sensor'
+        //         } // container
+        //     } // steps
+        // } // stage(build)
 
         stage('Docker release parallel') {
             environment {
