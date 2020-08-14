@@ -1,7 +1,7 @@
 pipeline {
     agent none 
     
-    // stages {
+    stages {
     //     stage('OpenShift Check') {
     //         environment {
     //             OC_TOKEN = credentials('SA_OC_TOKEN')
