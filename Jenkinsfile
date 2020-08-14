@@ -55,6 +55,10 @@ pipeline {
                 OPENSHIFT_URL = 'https://api.okd.codespring.ro:6443'
                 OC_TOKEN = credentials('SA_OC_TOKEN')
             }
+            input {
+                message "Deploy to cluster?"
+                submitter "admin"
+            }
             agent {
                 label 'aggregator-agent-local'
             }        
