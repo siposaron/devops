@@ -7,7 +7,7 @@ pipeline {
         //     parallel {
         //         stage('Build Aggregator') {
         //             agent {
-        //                 label 'aggregator-agent-local'
+        //                 label 'aggregator-agent-docker-local'
         //             }
         //             steps {
         //                 sh 'make build-aggregator'
@@ -15,7 +15,7 @@ pipeline {
         //         }
         //         stage('Build Sensor') {
         //             agent {
-        //                 label 'aggregator-agent-local'
+        //                 label 'aggregator-agent-docker-local'
         //             }
         //             steps {
         //                 sh 'make build-sensor'
@@ -32,7 +32,7 @@ pipeline {
         //     parallel {
         //         stage('Release Aggregator docker image') {
         //             agent {
-        //                 label 'aggregator-agent-local'
+        //                 label 'aggregator-agent-docker-local'
         //             }
         //             steps {
         //                 sh("docker login -u $DOCKER_USER -p $DOCKER_PASS")
@@ -41,7 +41,7 @@ pipeline {
         //         }
         //         stage('Release Sensor docker image') {
         //             agent {
-        //                 label 'aggregator-agent-local'
+        //                 label 'aggregator-agent-docker-local'
         //             }
         //             steps {
         //                 sh("docker login -u $DOCKER_USER -p $DOCKER_PASS")
@@ -60,7 +60,7 @@ pipeline {
             }        
             steps {
                 script {
-                    sh("oc login $OPENSHIFT_URL --token=$OC_TOKEN --insecure-skip-tls-verify")
+                    // sh("oc login $OPENSHIFT_URL --token=$OC_TOKEN --insecure-skip-tls-verify")
                     sh "oc project metrics"
                     sh "make deploy-services"
                 } 
