@@ -2,14 +2,17 @@ FROM jenkins/inbound-agent:latest-jdk11
 
 USER root
 
+# DEPENDENCIES
 RUN apt-get update && apt-get install \
     make \
     apt-transport-https \
     ca-certificates \
     curl \
     gnupg-agent \
-    software-properties-common -y
+    software-properties-common \
+    gettext -y
 
+# DOCKER
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 RUN apt-key fingerprint 0EBFCD88
 
@@ -22,6 +25,7 @@ RUN apt-get update -y
 RUN apt-get install docker-ce docker-ce-cli containerd.io -y
 RUN docker -v
 
+#MAVEN 
 # Downloading and installing Maven
 # 1- Define a constant with the version of maven you want to install
 ARG MAVEN_VERSION=3.6.3        
@@ -54,3 +58,15 @@ RUN mkdir -p /home/jenkins/maven /home/jenkins/maven/ref \
 # 6- Define environmental variables required by Maven, like Maven_Home directory and where the maven repo is located
 ENV MAVEN_HOME /home/jenkins/maven
 ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
+
+# OC CLIENT
+ARG OC_VERSION=4.5
+ARG OC_BASE_URL=https://mirror.openshift.com/pub/openshift
+
+RUN echo "Downloading Openshift client" \
+  && curl -fsSL -o /tmp/oc.tar.gz ${OC_BASE_URL}-v$(echo $OC_VERSION | cut -d'.' -f 1)/clients/oc/$OC_VERSION/linux/oc.tar.gz \
+  && echo "Unziping oc client" \
+  && tar -xzf /tmp/oc.tar.gz -C /home/jenkins \
+  && echo "Cleanup and setting links" \
+  && rm -f /tmp/oc.tar.gz \
+  && ln -s /home/jenkins/oc /usr/bin/oc

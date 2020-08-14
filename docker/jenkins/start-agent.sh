@@ -13,4 +13,5 @@ fi
 
 docker stop jenkins-agent
 docker container rm jenkins-agent
+docker image pull siposaron/jenkins-agent-j11-maven:$1
 docker run --env-file env.conf --name jenkins-agent -v /var/run/docker.sock:/var/run/docker.sock --init siposaron/jenkins-agent-j11-maven:$1
