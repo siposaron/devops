@@ -89,7 +89,7 @@ pipeline {
             }        
             steps {
                 script {
-                    sh("oc login $OPENSHIFT_URL --token=$OC_TOKEN")
+                    sh("oc login $OPENSHIFT_URL --token=$OC_TOKEN --insecure-skip-tls-verify")
                     sh "make deploy-services"
                 } // container
             } // steps
